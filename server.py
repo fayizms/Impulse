@@ -4,7 +4,7 @@ import threading
 from datetime import datetime
 import pytz
 
-version = 2.0
+version = 1.0
 
 IP = socket.gethostbyname(socket.gethostname())
 PORT = 8080
@@ -33,33 +33,48 @@ def start():
         ClientThread.start()
 
 def ConnectClient(conn, addr):
-    date = current.strftime('%Y-%m-%d')
-    time = current.strftime('%H:%M:%S')
-    print(f"\n[{date} || {time}] {addr} Connected to Server\n")
+    date_time = GetTime()
+    print(f"\n[{date_time}] <{addr[0]}> Connected to Server\n")
 
     isConnected = True
     while isConnected:
-        msg = conn.recv(10)     # Receive Header
-        if msg:
-            date = current.strftime('%Y-%m-%d')
-            time = current.strftime('%H:%M:%S')
+        try:
+            msg = conn.recv(10)     # Receive Header
+            if msg:
+                d_msg = msg.decode('utf-8')
+                client_message = conn.recv(int(d_msg))
+                c_msg = client_message.decode('utf-8')
 
-            d_msg = msg.decode('utf-8')
-            client_message = conn.recv(int(d_msg))
-            c_msg = client_message.decode('utf-8')
+                if not c_msg == DC_CODE:
+                    date_time = GetTime()
+                    print(f"[{date_time}] <{addr[0]}> - {c_msg}")
 
-            if not c_msg == DC_CODE:
-                print(f"[{date}  {time}] [{addr}] - {c_msg}")
+                else:
+                    print(f"\n[{date_time}] <{addr[0]}> Disconnected from server\n")
+                    isConnected = False
 
-            else:
-                print(f"[({addr}) - Disconnected From Server] ")
-                isConnected = False
+        except ConnectionResetError:
+            date_time = GetTime()
+
+            print(f"\n[*] ({date_time}) <{addr[0]}> Forcibly Disconnected from server\n")
+            isConnected = False
+
+
+
+
+def GetTime():
+    date = current.strftime('%Y-%m-%d')
+    time = current.strftime('%H:%M:%S')
+    date_time = f"{date} || {time}"
+    
+    return date_time
 
 try:
-    print(f"\nImpulse Terminal [Development Build v{version}] \n(c) 2021 Beta Technologies. All rights reserved.")
+    print(f"\nImpulse Terminal [Official Build v{version}] \n(c) 2021 Beta Technologies. All rights reserved.")
     print("\n[*] Activating Server..")
     print("[*] Server Succesfully Activated\n")
     start()
+
 except KeyboardInterrupt:
     print("[*] Interrupt Requested")
     print("[*] Application Exiting")
