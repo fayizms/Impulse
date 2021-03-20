@@ -1,7 +1,7 @@
 import socket
 import sys
 
-HOST = socket.gethostbyname(socket.gethostname())
+HOST = input("Server IP : ")
 PORT = 8080
 IP = socket.gethostbyname(socket.gethostname())
 DC_CODE = "#DC#"
@@ -17,6 +17,7 @@ try:
 except Exception as exc:
     print("[*] Unable to connect to server")
     sys.exit()
+
 
 def send(message):
     msg = message.encode('utf-8')
